@@ -44,7 +44,7 @@ export function activate(context: vscode.ExtensionContext) {
         }
 
         const config = vscode.workspace.getConfiguration('codeCollab');
-        const serverUrl = config.get<string>('serverUrl', 'http://localhost:8080/api/extension/ask');
+        const serverUrl = config.get<string>('serverUrl', 'https://ajt-be-3.onrender.com/api/extension/ask');
         const username = config.get<string>('username', 'admin');
 
         try {
@@ -56,7 +56,9 @@ export function activate(context: vscode.ExtensionContext) {
                 tags: editor.document.languageId
             });
         } catch (error: any) {
-            vscode.window.showErrorMessage(`Failed to send question: ${error.message}`);
+            outputChannel.show(true);
+            outputChannel.appendLine(`[Network Error]: ${error.message}`);
+            vscode.window.showErrorMessage(`Code Collab: Failed to connect to backend — ${error.message}`);
         }
     });
 
