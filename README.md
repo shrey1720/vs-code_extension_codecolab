@@ -36,8 +36,8 @@ CodeCollab Obsidian is a high-fidelity collaboration client that connects your e
 
 ## 🔗 Project Links
 
-*   **Repository**: [github.com/shrey1720/Harmonium](https://github.com/shrey1720/Harmonium.git)
-*   **Issues**: [Report a bug](https://github.com/shrey1720/Harmonium/issues)
+*   **Repository**: [github.com/shrey1720/vs-code_extension_codecolab](https://github.com/shrey1720/vs-code_extension_codecolab.git)
+*   **Issues**: [Report a bug](https://github.com/shrey1720/vs-code_extension_codecolab/issues)
 *   **License**: **MIT** — Free for personal and commercial use.
 
 ---
