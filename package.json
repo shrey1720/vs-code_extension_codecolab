@@ -1,0 +1,100 @@
+{
+  "name": "code-collab-engine",
+  "displayName": "CodeCollab Obsidian",
+  "description": "Premium Code Collaboration and Discussion Engine with Obsidian Aesthetics. Search, share, and solve code issues instantly.",
+  "publisher": "shrey",
+  "icon": "media/icon.png",
+  "keywords": [
+    "codecollab",
+    "collaboration",
+    "code share",
+    "discussion",
+    "obsidian",
+    "java",
+    "socket"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/shrey1720/Harmonium.git"
+  },
+  "version": "0.0.1",
+  "engines": {
+    "vscode": "^1.80.0"
+  },
+  "categories": [
+    "Chat",
+    "Education",
+    "Other"
+  ],
+  "activationEvents": [],
+  "main": "./out/extension.js",
+  "contributes": {
+    "commands": [
+      {
+        "command": "codeCollab.askQuestion",
+        "title": "Code Collab: Ask Question"
+      }
+    ],
+    "viewsContainers": {
+      "activitybar": [
+        {
+          "id": "code-collab-explorer",
+          "title": "Code Collab",
+          "icon": "media/icon.png"
+        }
+      ]
+    },
+    "views": {
+      "code-collab-explorer": [
+        {
+          "type": "webview",
+          "id": "codeCollab.sidebar",
+          "name": "Obsidian Dashboard"
+        }
+      ]
+    },
+    "menus": {
+      "editor/context": [
+        {
+          "when": "editorHasSelection",
+          "command": "codeCollab.askQuestion",
+          "group": "YourGroup@1"
+        }
+      ]
+    },
+    "configuration": {
+      "title": "Code Collab",
+      "properties": {
+        "codeCollab.serverUrl": {
+          "type": "string",
+          "default": "http://localhost:8080/api/extension/ask",
+          "description": "The HTTP URL for the Socket Bridge (e.g., http://localhost:8080/api/extension/ask)"
+        },
+        "codeCollab.username": {
+          "type": "string",
+          "default": "admin",
+          "description": "Your username on the Code Collab platform (used for attribution)"
+        }
+      }
+    }
+  },
+  "scripts": {
+    "vscode:prepublish": "npm run compile",
+    "compile": "tsc -p ./",
+    "watch": "tsc -watch -p ./",
+    "pretest": "npm run compile && npm run lint",
+    "lint": "eslint src --ext ts"
+  },
+  "devDependencies": {
+    "@types/vscode": "^1.80.0",
+    "@types/node": "18.x",
+    "@types/ws": "^8.5.10",
+    "@typescript-eslint/eslint-plugin": "^5.59.1",
+    "@typescript-eslint/parser": "^5.59.1",
+    "eslint": "^8.39.0",
+    "typescript": "^5.0.4"
+  },
+  "dependencies": {
+    "ws": "^8.13.0"
+  }
+}
