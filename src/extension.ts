@@ -83,18 +83,17 @@ class CodeCollabViewProvider implements vscode.WebviewViewProvider {
             localResourceRoots: [this._extensionUri]
         };
 
-        webviewView.webview.html = this._getHtmlForWebview(webviewView.webview);
-
-        // Send current username to webview
+        // Read username from settings and embed directly into the HTML (avoids race condition)
         const config = vscode.workspace.getConfiguration('codeCollab');
         const username = config.get<string>('username', 'admin');
-        webviewView.webview.postMessage({ type: 'updateUser', username: username });
+        webviewView.webview.html = this._getHtmlForWebview(webviewView.webview, username);
 
         // Listen for configuration changes
         const changeConfigDisposable = vscode.workspace.onDidChangeConfiguration(e => {
-            if (e.affectsConfiguration('codeCollab.username')) {
+            if (e.affectsConfiguration('codeCollab.username') || e.affectsConfiguration('codeCollab.serverUrl')) {
                 const newUsername = vscode.workspace.getConfiguration('codeCollab').get<string>('username', 'admin');
-                webviewView.webview.postMessage({ type: 'updateUser', username: newUsername });
+                // Re-render the entire webview so username updates immediately
+                webviewView.webview.html = this._getHtmlForWebview(webviewView.webview, newUsername);
             }
         });
         webviewView.onDidDispose(() => changeConfigDisposable.dispose());
@@ -111,7 +110,7 @@ class CodeCollabViewProvider implements vscode.WebviewViewProvider {
         });
     }
 
-    private _getHtmlForWebview(webview: vscode.Webview) {
+    private _getHtmlForWebview(webview: vscode.Webview, username: string) {
         return `<!DOCTYPE html>
             <html lang="en">
             <head>
@@ -187,7 +186,7 @@ class CodeCollabViewProvider implements vscode.WebviewViewProvider {
                 
                 <div class="status-card">
                     <div class="status-title">CONNECTED USER</div>
-                    <div class="status-value" id="username">Loading...</div>
+                    <div class="status-value" id="username">${username}</div>
                 </div>
 
                 <div class="hint">
