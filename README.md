@@ -4,6 +4,8 @@
 
 CodeCollab Obsidian is a high-fidelity collaboration client that connects your editor directly to a centralized knowledge base. Share code, ask questions, and solve complex logic issues without ever leaving your workspace.
 
+**→ [User guide (installation, settings, troubleshooting)](USER_GUIDE.md)**
+
 ---
 
 ## ✨ Key Features
@@ -17,27 +19,31 @@ CodeCollab Obsidian is a high-fidelity collaboration client that connects your e
 
 ## 🚀 Setup
 
-1.  **Backend Connectivity**: 
-    Ensure your [CodeCollab Backend](https://github.com/shrey1720/Harmonium.git) is running.
-2.  **Configuration**:
-    - Open VS Code Settings (`Ctrl + ,`).
-    - Set your **Server URL** (Default: `http://localhost:8080/api/extension/ask`).
-    - Set your **Username** (To attribute your questions).
+1.  **Backend**: Ensure your Code Collab API is running and exposes the extension ask endpoint — source and deployment: **[shrey1720/ajt_be](https://github.com/shrey1720/ajt_be)**.
+2.  **Configuration**: Open Settings (`Ctrl + ,`), search **Code Collab**:
+    - **Server Url** — full URL to the ask endpoint (`https://ajt-be-3.onrender.com/api/extension/ask` for the deployed API, or `http://localhost:8080/api/extension/ask` for local dev).
+    - **Username** — platform username for attribution.
+
+Details: **[USER_GUIDE.md](USER_GUIDE.md)**.
 
 ---
 
 ## 🛠 Usage
 
-1.  **Sidebar**: Click the **Code Collab** icon in the Activity Bar.
-2.  **Context Menu**: Right-click any selection -> **Code Colab: Ask Question**.
-3.  **Command Palette**: `Ctrl + Shift + P` -> Search for `Code Collab`.
+1.  **Sidebar**: Activity Bar → **Code Collab** → **Ask About Selection** (with code selected).
+2.  **Context menu**: Select code → right-click → **Code Collab: Ask Question**.
+3.  **Command Palette**: `Ctrl + Shift + P` → **Code Collab: Ask Question**.
 
 ---
 
-## 🔗 Project Links
+## 🔗 Project links
 
-*   **Repository**: [github.com/shrey1720/vs-code_extension_codecolab](https://github.com/shrey1720/vs-code_extension_codecolab.git)
-*   **Issues**: [Report a bug](https://github.com/shrey1720/vs-code_extension_codecolab/issues)
+| Part | Repository |
+|------|----------------|
+| **Backend** (Java API, Render deploy) | [github.com/shrey1720/ajt_be](https://github.com/shrey1720/ajt_be) |
+| **Frontend** (web UI) | [github.com/shrey1720/codecolab](https://github.com/shrey1720/codecolab) |
+| **Extension issues / releases** | Use [codecolab Issues](https://github.com/shrey1720/codecolab/issues) for product feedback, or open issues on **ajt_be** for API-only bugs. |
+
 *   **License**: **MIT** — Free for personal and commercial use.
 
 ---

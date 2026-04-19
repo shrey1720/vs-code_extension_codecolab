@@ -213,15 +213,24 @@ class CodeCollabViewProvider implements vscode.WebviewViewProvider {
     }
 }
 
+/** Long timeout: Render free tier cold starts can take 60s+ before the service accepts traffic. */
+const ASK_REQUEST_TIMEOUT_MS = 120_000;
+
 async function postQuestion(url: string, payload: any) {
     outputChannel.show(true);
     outputChannel.appendLine(`[${new Date().toLocaleTimeString()}] Sending question to ${url}...`);
+
+    const localhostHint =
+        url.includes('localhost') || url.includes('127.0.0.1')
+            ? ' You are targeting localhost — set "Code Collab: Server Url" (codeCollab.serverUrl) to your HTTPS Render URL if the API is deployed.'
+            : '';
 
     try {
         const response = await fetch(url, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(payload)
+            body: JSON.stringify(payload),
+            signal: AbortSignal.timeout(ASK_REQUEST_TIMEOUT_MS)
         });
 
         if (response.ok) {
@@ -229,12 +238,26 @@ async function postQuestion(url: string, payload: any) {
             outputChannel.appendLine(`[Server Reply]: ${JSON.stringify(data)}`);
             vscode.window.showInformationMessage('Code Collab: Question posted successfully!');
         } else {
-            const errData: any = await response.json();
-            outputChannel.appendLine(`[Error]: ${JSON.stringify(errData)}`);
-            vscode.window.showErrorMessage(`Server error: ${errData.error || 'Unknown error'}`);
+            let errBody: string;
+            try {
+                const errData: any = await response.json();
+                errBody = JSON.stringify(errData);
+                vscode.window.showErrorMessage(`Server error: ${errData.error || response.statusText || 'Unknown error'}`);
+            } catch {
+                errBody = await response.text();
+                vscode.window.showErrorMessage(`Server error: HTTP ${response.status} ${response.statusText}`);
+            }
+            outputChannel.appendLine(`[Error]: ${errBody}`);
         }
     } catch (err: any) {
-        outputChannel.appendLine(`[Network Error]: ${err.message}. Ensure your Java Backend is running!`);
+        const name = err?.name || '';
+        const extra =
+            name === 'TimeoutError'
+                ? ' Request timed out — if the API is on Render free tier, retry after the service wakes (first request can take 1–2 minutes).'
+                : '';
+        outputChannel.appendLine(
+            `[Network Error]: ${err.message}.${localhostHint}${extra} Ensure the URL is correct and the backend is reachable.`
+        );
         throw err;
     }
 }

@@ -15,8 +15,12 @@
   ],
   "repository": {
     "type": "git",
-    "url": "https://github.com/shrey1720/vs-code_extension_codecolab.git"
+    "url": "https://github.com/shrey1720/codecolab.git"
   },
+  "bugs": {
+    "url": "https://github.com/shrey1720/codecolab/issues"
+  },
+  "homepage": "https://github.com/shrey1720/codecolab#readme",
   "version": "0.0.1",
   "engines": {
     "vscode": "^1.80.0"
@@ -67,8 +71,8 @@
       "properties": {
         "codeCollab.serverUrl": {
           "type": "string",
-          "default": "http://localhost:8080/api/extension/ask",
-          "description": "The HTTP URL for the Socket Bridge (e.g., http://localhost:8080/api/extension/ask)"
+          "default": "https://ajt-be-3.onrender.com/api/extension/ask",
+          "description": "Full URL for the extension ask endpoint. Use your deployed API (https://YOUR-SERVICE.onrender.com/api/extension/ask) or http://localhost:8080/api/extension/ask for local dev."
         },
         "codeCollab.username": {
           "type": "string",
