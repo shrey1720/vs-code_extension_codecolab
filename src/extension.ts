@@ -290,24 +290,33 @@ function initNotificationBridge() {
     
     try {
         wsClient = new WebSocket(wsUrl);
+        let heartbeatInterval: NodeJS.Timeout;
 
         wsClient.on('open', () => {
             outputChannel.appendLine(`[Bridge]: Real-time connection established for user: ${username}`);
+            
+            // Start Heartbeat to keep connection alive
+            heartbeatInterval = setInterval(() => {
+                if (wsClient && wsClient.readyState === WebSocket.OPEN) {
+                    wsClient.send('ping');
+                }
+            }, 25000);
         });
 
         wsClient.on('message', (data) => {
+            if (data.toString() === 'pong') return; // Ignore heartbeat response
+            
             try {
                 const event = JSON.parse(data.toString());
                 
                 // Check if this notification is relevant to the current user
-                // For simplicity in this v1, we show a toast for all relevant collaboration activities
-                if (event.type === 'answer_posted' || event.type === 'comment_posted') {
+                if (event.type === 'answer_posted' || event.type === 'comment_posted' || event.type === 'bounty_awarded') {
                     const message = event.message || 'New activity on CodeCollab';
                     const qId = event.details?.questionId;
                     
                     vscode.window.showInformationMessage(`🔔 CodeCollab: ${message}`, 'View Solution').then(selection => {
                         if (selection === 'View Solution' && qId) {
-                            const webUrl = baseUrl.replace('/api/extension/ask', '').replace('/extension/ask', '') + `/question.html?id=${qId}`;
+                            const webUrl = baseUrl.replace('/api/extension/ask', '').replace('/extension/ask', '') + `question.html?id=${qId}`;
                             vscode.env.openExternal(vscode.Uri.parse(webUrl));
                         }
                     });
@@ -321,9 +330,11 @@ function initNotificationBridge() {
             outputChannel.appendLine(`[Bridge Error]: ${err.message}`);
         });
 
-        wsClient.on('close', () => {
-            outputChannel.appendLine(`[Bridge]: Connection closed. Retrying in 30s...`);
-            setTimeout(initNotificationBridge, 30000);
+        wsClient.on('close', (code, reason) => {
+            if (heartbeatInterval) clearInterval(heartbeatInterval);
+            outputChannel.appendLine(`[Bridge]: Connection closed (Code: ${code}). Reason: ${reason || 'None'}`);
+            outputChannel.appendLine(`[Bridge]: Retrying in 10s...`);
+            setTimeout(initNotificationBridge, 10000);
         });
 
     } catch (err: any) {
