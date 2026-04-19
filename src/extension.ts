@@ -10,6 +10,9 @@ export function activate(context: vscode.ExtensionContext) {
 
     outputChannel = vscode.window.createOutputChannel('Code Collab Engine');
     context.subscriptions.push(outputChannel);
+    
+    // Initialize Notification Bridge
+    initNotificationBridge();
 
     // Register Sidebar Provider
     const provider = new CodeCollabViewProvider(context.extensionUri);
@@ -262,4 +265,68 @@ async function postQuestion(url: string, payload: any) {
     }
 }
 
-export function deactivate() {}
+export function deactivate() {
+    if (wsClient) {
+        wsClient.close();
+    }
+}
+
+function initNotificationBridge() {
+    const config = vscode.workspace.getConfiguration('codeCollab');
+    const baseUrl = config.get<string>('serverUrl', 'https://ajt-be-3.onrender.com/api/extension/ask');
+    const username = config.get<string>('username', 'admin');
+    
+    // Transform HTTP/HTTPS to WS/WSS
+    let wsUrl = baseUrl.replace('/extension/ask', '/ws/notifications')
+                       .replace('/api/extension/ask', '/api/ws/notifications');
+    
+    if (wsUrl.startsWith('https://')) {
+        wsUrl = wsUrl.replace('https://', 'wss://');
+    } else if (wsUrl.startsWith('http://')) {
+        wsUrl = wsUrl.replace('http://', 'ws://');
+    }
+
+    outputChannel.appendLine(`[Bridge]: Connecting to ${wsUrl}...`);
+    
+    try {
+        wsClient = new WebSocket(wsUrl);
+
+        wsClient.on('open', () => {
+            outputChannel.appendLine(`[Bridge]: Real-time connection established for user: ${username}`);
+        });
+
+        wsClient.on('message', (data) => {
+            try {
+                const event = JSON.parse(data.toString());
+                
+                // Check if this notification is relevant to the current user
+                // For simplicity in this v1, we show a toast for all relevant collaboration activities
+                if (event.type === 'answer_posted' || event.type === 'comment_posted') {
+                    const message = event.message || 'New activity on CodeCollab';
+                    const qId = event.details?.questionId;
+                    
+                    vscode.window.showInformationMessage(`🔔 CodeCollab: ${message}`, 'View Solution').then(selection => {
+                        if (selection === 'View Solution' && qId) {
+                            const webUrl = baseUrl.replace('/api/extension/ask', '').replace('/extension/ask', '') + `/question.html?id=${qId}`;
+                            vscode.env.openExternal(vscode.Uri.parse(webUrl));
+                        }
+                    });
+                }
+            } catch (err) {
+                console.error('Failed to parse socket message', err);
+            }
+        });
+
+        wsClient.on('error', (err) => {
+            outputChannel.appendLine(`[Bridge Error]: ${err.message}`);
+        });
+
+        wsClient.on('close', () => {
+            outputChannel.appendLine(`[Bridge]: Connection closed. Retrying in 30s...`);
+            setTimeout(initNotificationBridge, 30000);
+        });
+
+    } catch (err: any) {
+        outputChannel.appendLine(`[Bridge Setup Error]: ${err.message}`);
+    }
+}
