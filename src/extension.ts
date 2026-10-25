@@ -21,7 +21,7 @@ export function activate(context: vscode.ExtensionContext) {
     );
 
     // Register our main command
-    let disposable = vscode.commands.registerCommand('codeCollab.askQuestion', async () => {
+    const disposable = vscode.commands.registerCommand('codeCollab.askQuestion', async () => {
         const editor = vscode.window.activeTextEditor;
         
         if (!editor) {
@@ -76,7 +76,7 @@ class CodeCollabViewProvider implements vscode.WebviewViewProvider {
 
     public resolveWebviewView(
         webviewView: vscode.WebviewView,
-        context: vscode.WebviewViewResolveContext,
+        _context: vscode.WebviewViewResolveContext,
         _token: vscode.CancellationToken,
     ) {
         this._view = webviewView;
